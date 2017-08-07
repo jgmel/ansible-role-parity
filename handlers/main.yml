@@ -1,0 +1,7 @@
+---
+
+- name: restart parity
+  systemd: name=parity state=restarted daemon_reload=yes
+
+# - name: reload parity
+#   service: name=parity state=reloaded

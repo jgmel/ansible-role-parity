@@ -1,0 +1,14 @@
+---
+
+- name: Download parity package - Parity
+  get_url:
+    url: "{{ parity_pkg_deb_url }}"
+    dest: /var/tmp/parity.deb
+    checksum: "md5:{{ parity_pkg_deb_sum }}"
+  tags: ["parity"]
+
+- name: Install parity package - Parity
+  apt:
+    deb: /var/tmp/parity.deb
+    state: "{{ parity_pkg_state }}"
+  tags: ["parity"]

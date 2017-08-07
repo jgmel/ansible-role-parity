@@ -1,0 +1,110 @@
+---
+
+#
+# Install Rust
+#
+
+- name: Install rustc
+  apt:
+    name: rustc
+    state: present
+  when: ansible_os_family == 'Debian'
+  tags: ["rust"]
+
+- name: Register rust version that is installed on system - Rust Lang
+  command: "/bin/sh -c \"( rustc --version || echo rustc None ) | cut -d' ' -f 2\""
+  register: rustc_version_output
+  changed_when: false
+  tags: ["rust"]
+#  when: ansible_os_family == 'RedHat'
+
+- name: Set rustc_installed_version fact - Rust Lang
+  set_fact: rustc_installed_version={{rustc_version_output.stdout}}
+  tags: ["rust"]
+#  when: ansible_os_family == 'RedHat'
+
+- name: Debug - Rust Lang
+  debug: msg={{rustc_installed_version}}
+  tags: ["rust"]
+#  when: ansible_os_family == 'RedHat'
+
+- name: Download rustup.sh - Rust Lang
+  get_url:
+    url: https://static.rust-lang.org/rustup.sh
+    dest: /var/tmp/rustup.sh
+    mode: u+x
+  when: rustc_installed_version != rustc_version and ansible_os_family == 'RedHat'
+  tags: ["rust"]
+
+- name: Install by rustup.sh - Rust Lang
+  command: /var/tmp/rustup.sh
+  when: rustc_installed_version != rustc_version and ansible_os_family == 'RedHat'
+  tags: ["rust"]
+
+#
+# Buiild Parity
+#
+
+- name: Install tools and dependencies - RedHat
+  yum:
+    name: "{{ item }}"
+    state: present
+  when: ansible_os_family == 'RedHat'
+  with_items:
+    - git
+    - make
+    - gcc-c++
+    - gcc
+    - file
+    - binutils
+  tags: ["packages","parity"]
+
+- name: Install tools and dependencies - Debian
+  apt:
+    name: "{{ item }}"
+    state: present
+  when: ansible_os_family == 'Debian'
+  with_items:
+    - git
+    - make
+    - gcc-c++
+    - gcc
+    - file
+    - binutils
+  tags: ["packages","parity"]
+
+- name: Install tools dependencies - RedHat
+  yum:
+    name: "{{ item }}"
+    state: present
+  when: ansible_os_family == 'RedHat'
+  with_items:
+    - libudev-devel
+    - openssl-devel
+    - libselinux-python
+  tags: ["packages","parity"]
+
+- name: Git clone parity - Parity
+  git:
+    repo: "{{ parity_git_repo }}"
+    dest: "{{ parity_tmp_build_path }}"
+    version: "{{ parity_git_version }}"
+  when: parity_install_from_source | default(false)
+  tags: ["parity"]
+
+- name: Build parity - Parity
+  command: "cargo build --release --verbose"
+  args:
+    chdir: "{{ parity_tmp_build_path }}"
+    creates: "{{ parity_tmp_build_path }}/target/release/parity"
+  when: parity_install_from_source | default(false)
+  tags: ["parity"]
+
+- name: Install binary - Parity
+  copy:
+    src: "{{ parity_tmp_build_path }}/target/release/parity"
+    dest: /usr/bin/parity
+    remote_src: yes
+    mode: u=rwx,g=rx,o=rx
+  when: parity_install_from_source | default(false)
+  tags: ["parity"]

@@ -1,0 +1,36 @@
+---
+
+parity_force_install_from_source: no
+
+parity_pkg_deb_url: http://parity-downloads-mirror.parity.io/v1.6.10/x86_64-unknown-debian-gnu/parity_1.6.10_amd64.deb
+parity_pkg_deb_sum: 1ac579c0e698d2b671b364c0e8319671
+parity_pkg_state: installed
+
+parity_pkg_version: 1.6.10
+
+parity_git_repo: https://github.com/paritytech/parity
+parity_git_version: "v1.6.10"
+
+# Service states: started or stopped
+parity_service_state: started
+# Service enabled on startup: yes or no
+parity_service_enabled: yes
+
+parity_tmp_build_path: /usr/src/parity
+
+parity_base_path: /var/lib/parity
+
+parity_disable_ui: yes
+parity_disable_ipc: yes
+parity_disable_dapps: yes
+
+parity_user: parity
+parity_group: parity
+
+parity_jsonrpc_port: 8545
+parity_jsonrpc_interface: 0.0.0.0
+parity_jsonrpc_hosts: ['all']
+
+parity_author: c24b5c37463b56bc024abb1235c070dcf7406612
+
+rustc_version: "1.19.0"

@@ -1,0 +1,5 @@
+---
+- hosts: parity
+  remote_user: root
+  roles:
+    - ansible-role-parity

@@ -1,0 +1,31 @@
+#Parity config
+ARGS=
+
+
+{%- if parity_disable_ui is defined -%}
+{{" "}}--no-ui
+{%- endif -%}
+
+{%- if parity_disable_ipc is defined -%}
+{{" "}}--no-ipc
+{%- endif -%}
+
+{%- if parity_disable_dapps is defined -%}
+{{" "}}--no-dapps
+{%- endif -%}
+
+{%- if parity_jsonrpc_interface is defined -%}
+{{" "}}--jsonrpc-interface {{ parity_jsonrpc_interface | default('127.0.0.1') }}
+{%- endif -%}
+
+{%- if parity_jsonrpc_hosts is defined -%}
+{{" "}}--jsonrpc-hosts {{ parity_jsonrpc_hosts | join(',')}}
+{%- endif -%}
+
+{%- if parity_base_path is defined -%}
+{{" "}}--base-path {{ parity_base_path }}
+{%- endif -%}
+
+{% if parity_author is defined -%}
+{{" "}}--author {{ parity_author }}
+{%- endif -%}

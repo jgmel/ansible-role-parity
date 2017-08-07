@@ -1,0 +1,63 @@
+---
+
+- name: Add group {{ parity_group }} - Parity
+  group:
+    name: "{{ parity_group }}"
+    state: present
+    system: yes
+
+- name: Add user {{ parity_user }} - Parity
+  user:
+    name: "{{ parity_user }}"
+    group: "{{ parity_group }}"
+    state: present
+    home: "{{ parity_base_path }}"
+    shell: /bin/false
+    system: yes
+
+- name: Determine installation Binary/Source - Parity
+  set_fact: parity_install_from_source=true
+  when: ansible_os_family == 'RedHat' or parity_force_install_from_source
+  tags: ["parity"]
+
+- name: Install parity from Binary Debian/Ubuntu - Parity
+  include: install_binary.yml
+  when: ansible_os_family == 'Debian' and parity_install_from_source is not defined
+  tags: ["parity"]
+
+- name: Install parity from Source - Parity
+  include: install_source.yml
+  when: parity_install_from_source | default(false)
+  tags: ["parity"]
+
+- name: Create base directory - Parity
+  file:
+    path: "{{ parity_base_path }}"
+    state: directory
+    owner: "{{ parity_user | default('root') }}"
+    group: "{{ parity_group | default('root') }}"
+  tags: ["parity"]
+
+- name: Install parity config file - Parity
+  template:
+    src: parity.conf.j2
+    dest: /etc/parity.conf
+  notify:
+    - restart parity
+  tags: ["parity", "configure"]
+
+- name: Install parity systemd unit file - Parity
+  template:
+    src: parity.service.j2
+    dest: /etc/systemd/system/parity.service
+  notify:
+    - restart parity
+  tags: ["parity","service"]
+
+- name: Ensure parity is started/enabled - Parity
+  systemd:
+    name: parity
+    state: "{{ parity_service_state }}"
+    enabled: "{{ parity_service_enabled }}"
+    daemon_reload: yes
+  tags: ["parity", "service"]
